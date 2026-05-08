@@ -1,8 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Activity, 
   TrendingUp, 
-  AlertCircle, 
   Search, 
   Filter, 
   ArrowUpRight, 
@@ -10,7 +9,10 @@ import {
   Globe,
   Zap,
   Shield,
-  Eye
+  Plus,
+  Loader2,
+  CheckCircle2,
+  ExternalLink
 } from 'lucide-react';
 
 const BentoCard = ({ children, className = "", title, icon: Icon }: { children: React.ReactNode, className?: string, title?: string, icon?: any }) => (
@@ -75,9 +77,122 @@ const InsightCard = ({ title, description, impact }: { title: string, descriptio
 );
 
 export const Dashboard = () => {
+  const [competitors, setCompetitors] = useState([
+    { name: 'CloudMetrics', score: 85, url: 'cloudmetrics.com', status: 'active' },
+    { name: 'DataFlow AI', score: 42, url: 'dataflow.ai', status: 'warning' },
+    { name: 'ScaleOps', score: 78, url: 'scaleops.io', status: 'active' },
+  ]);
+
+  const [newUrl, setNewUrl] = useState('');
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [analysisStep, setAnalysisStep] = useState(0);
+
+  const steps = [
+    "Initializing Firecrawl...",
+    "Scraping homepage and pricing...",
+    "Extracting messaging shifts...",
+    "Claude AI generating strategic insights...",
+    "Finalizing report..."
+  ];
+
+  const handleAddCompetitor = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newUrl) return;
+
+    setIsAnalyzing(true);
+    setAnalysisStep(0);
+
+    // Simulate analysis steps
+    for (let i = 0; i < steps.length; i++) {
+      setAnalysisStep(i);
+      await new Promise(resolve => setTimeout(resolve, 1500));
+    }
+
+    const name = newUrl.replace('https://', '').replace('http://', '').split('.')[0];
+    const capitalizedName = name.charAt(0).toUpperCase() + name.slice(1);
+
+    setCompetitors(prev => [
+      { name: capitalizedName, score: Math.floor(Math.random() * 40) + 30, url: newUrl, status: 'active' },
+      ...prev
+    ]);
+
+    setIsAnalyzing(false);
+    setShowAddModal(false);
+    setNewUrl('');
+  };
+
   return (
-    <div className="flex flex-col gap-8 p-8 max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-1000">
-      {/* Header with Search and Filter */}
+    <div className="flex flex-col gap-8 p-8 max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-1000 relative">
+      
+      {/* Add Competitor Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-md animate-in fade-in">
+          <div className="w-full max-w-lg bg-card border rounded-[2.5rem] p-8 shadow-2xl shadow-primary/20 animate-in zoom-in-95 duration-300">
+            {!isAnalyzing ? (
+              <form onSubmit={handleAddCompetitor} className="space-y-6">
+                <div className="space-y-2">
+                  <h2 className="text-2xl font-bold tracking-tight">Add New Competitor</h2>
+                  <p className="text-muted-foreground text-sm">Enter the website URL to start the AI analysis pipeline.</p>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="relative">
+                    <Globe className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <input 
+                      autoFocus
+                      type="text" 
+                      placeholder="https://competitor.com" 
+                      className="w-full pl-12 pr-4 py-4 rounded-2xl border bg-background/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-lg font-medium"
+                      value={newUrl}
+                      onChange={(e) => setNewUrl(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <button 
+                    type="button"
+                    onClick={() => setShowAddModal(false)}
+                    className="flex-1 px-6 py-4 rounded-2xl border font-bold hover:bg-muted transition-all"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit"
+                    className="flex-[2] px-6 py-4 rounded-2xl bg-primary text-primary-foreground font-bold hover:opacity-90 transition-all flex items-center justify-center gap-2"
+                  >
+                    Start Analysis
+                    <ArrowUpRight className="h-5 w-5" />
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className="py-12 flex flex-col items-center text-center space-y-8">
+                <div className="relative">
+                  <Loader2 className="h-20 w-20 text-primary animate-spin stroke-[1.5]" />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Zap className="h-8 w-8 text-primary animate-pulse" />
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <h3 className="text-2xl font-bold tracking-tight">Analyzing {newUrl}</h3>
+                  <div className="flex flex-col gap-2">
+                    {steps.map((step, i) => (
+                      <div key={i} className={`flex items-center gap-3 text-sm transition-all duration-500 ${i === analysisStep ? 'text-primary font-bold scale-105' : i < analysisStep ? 'text-emerald-500 opacity-60' : 'text-muted-foreground opacity-30'}`}>
+                        {i < analysisStep ? <CheckCircle2 className="h-4 w-4" /> : <div className={`h-1.5 w-1.5 rounded-full ${i === analysisStep ? 'bg-primary' : 'bg-muted-foreground'}`} />}
+                        {step}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 mb-2">
@@ -88,11 +203,18 @@ export const Dashboard = () => {
             Intelligence Overview
           </h1>
           <p className="text-muted-foreground text-lg max-w-xl">
-            Monitoring <span className="text-foreground font-medium underline decoration-primary/30 decoration-2 underline-offset-4">12 competitors</span> with real-time AI analysis.
+            Monitoring <span className="text-foreground font-medium underline decoration-primary/30 decoration-2 underline-offset-4">{competitors.length} competitors</span> with real-time AI analysis.
           </p>
         </div>
         
         <div className="flex items-center gap-3">
+          <button 
+            onClick={() => setShowAddModal(true)}
+            className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-primary text-primary-foreground hover:opacity-90 shadow-lg shadow-primary/20 transition-all font-bold text-sm"
+          >
+            <Plus className="h-5 w-5" />
+            Add Competitor
+          </button>
           <div className="relative group">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
             <input 
@@ -101,17 +223,13 @@ export const Dashboard = () => {
               className="pl-10 pr-4 py-2.5 rounded-2xl border bg-background/50 backdrop-blur-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all w-[240px]"
             />
           </div>
-          <button className="flex items-center gap-2 px-4 py-2.5 rounded-2xl border bg-background/50 backdrop-blur-xl hover:bg-muted transition-all font-medium text-sm">
-            <Filter className="h-4 w-4" />
-            Filters
-          </button>
         </div>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
-          { label: 'Tracked Rivals', value: '12', icon: Activity, trend: '+2', trendUp: true, color: 'text-blue-500' },
+          { label: 'Tracked Rivals', value: competitors.length.toString(), icon: Activity, trend: '+1', trendUp: true, color: 'text-blue-500' },
           { label: 'Site Updates', value: '48', icon: Globe, trend: '+12%', trendUp: true, color: 'text-emerald-500' },
           { label: 'AI Insights', value: '7', icon: Zap, trend: '-1', trendUp: false, color: 'text-amber-500' },
           { label: 'Market Share', value: '24%', icon: TrendingUp, trend: '+0.5%', trendUp: true, color: 'text-purple-500' },
@@ -163,12 +281,6 @@ export const Dashboard = () => {
               time="5h ago"
               type="positioning"
             />
-            <ActivityItem 
-              company="CloudMetrics" 
-              change="New comparison page: 'Why we are better than PulseIntel'" 
-              time="Yesterday"
-              type="positioning"
-            />
           </div>
           <button className="w-full mt-6 py-3 text-sm font-bold text-muted-foreground hover:text-primary transition-all border border-dashed rounded-2xl border-border hover:border-primary/50 hover:bg-primary/5">
             View All Activity
@@ -192,11 +304,6 @@ export const Dashboard = () => {
               description="Competitors are increasingly focusing on 'Native SOC2 Compliance' as a marketing hook. Your product already has this but isn't highlighting it."
               impact="medium"
             />
-            <InsightCard 
-              title="Messaging Shift"
-              description="Market sentiment is moving towards 'Efficiency' over 'Growth'. 3 competitors updated their copy this week."
-              impact="low"
-            />
           </div>
         </BentoCard>
 
@@ -207,18 +314,17 @@ export const Dashboard = () => {
           className="md:col-span-6 lg:col-span-4"
         >
           <div className="space-y-6 mt-2">
-            {[
-              { name: 'CloudMetrics', score: 85, trend: 'up' },
-              { name: 'DataFlow AI', score: 42, trend: 'down' },
-              { name: 'ScaleOps', score: 78, trend: 'stable' },
-            ].map((comp, i) => (
-              <div key={i} className="flex flex-col gap-3">
+            {competitors.map((comp, i) => (
+              <div key={i} className="flex flex-col gap-3 group/item">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center font-bold text-xs text-muted-foreground">
+                    <div className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center font-bold text-xs text-muted-foreground group-hover/item:bg-primary/10 group-hover/item:text-primary transition-colors">
                       {comp.name.charAt(0)}
                     </div>
-                    <span className="font-bold text-sm">{comp.name}</span>
+                    <div className="flex flex-col">
+                      <span className="font-bold text-sm">{comp.name}</span>
+                      <span className="text-[10px] text-muted-foreground">{comp.url}</span>
+                    </div>
                   </div>
                   <span className={`text-xs font-black ${comp.score > 70 ? 'text-rose-500' : 'text-emerald-500'}`}>
                     {comp.score}% Threat
