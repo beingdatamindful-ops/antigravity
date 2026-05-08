@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   Activity, 
   TrendingUp, 
   Search, 
-  Filter, 
   ArrowUpRight, 
   ArrowDownRight,
   Globe,
@@ -11,8 +10,7 @@ import {
   Shield,
   Plus,
   Loader2,
-  CheckCircle2,
-  ExternalLink
+  CheckCircle2
 } from 'lucide-react';
 
 const BentoCard = ({ children, className = "", title, icon: Icon }: { children: React.ReactNode, className?: string, title?: string, icon?: any }) => (
@@ -38,7 +36,7 @@ const ActivityItem = ({ company, change, time, type }: { company: string, change
   };
 
   return (
-    <div className="flex items-start gap-4 p-4 rounded-2xl hover:bg-muted/50 transition-colors border border-transparent hover:border-border">
+    <div className="flex items-start gap-4 p-4 rounded-2xl hover:bg-muted/50 transition-colors border border-transparent hover:border-border animate-in fade-in slide-in-from-left-4 duration-500">
       <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
         <Globe className="h-5 w-5 text-primary" />
       </div>
@@ -59,7 +57,7 @@ const ActivityItem = ({ company, change, time, type }: { company: string, change
 };
 
 const InsightCard = ({ title, description, impact }: { title: string, description: string, impact: 'high' | 'medium' | 'low' }) => (
-  <div className="p-4 rounded-2xl bg-muted/30 border border-border/50 hover:border-primary/30 transition-all cursor-default">
+  <div className="p-4 rounded-2xl bg-muted/30 border border-border/50 hover:border-primary/30 transition-all cursor-default animate-in fade-in slide-in-from-right-4 duration-500">
     <div className="flex items-center gap-2 mb-2">
       <Zap className="h-4 w-4 text-amber-500" />
       <span className="text-xs font-bold text-amber-500 uppercase tracking-tighter">Strategic Insight</span>
@@ -81,6 +79,17 @@ export const Dashboard = () => {
     { name: 'CloudMetrics', score: 85, url: 'cloudmetrics.com', status: 'active' },
     { name: 'DataFlow AI', score: 42, url: 'dataflow.ai', status: 'warning' },
     { name: 'ScaleOps', score: 78, url: 'scaleops.io', status: 'active' },
+  ]);
+
+  const [activities, setActivities] = useState([
+    { company: 'CloudMetrics', change: "Pricing page updated: New 'Enterprise' tier added at $499/mo", time: '24m ago', type: 'pricing' as const },
+    { company: 'DataFlow AI', change: "Released new 'Predictive Analytics' module with Snowflake integration", time: '2h ago', type: 'feature' as const },
+    { company: 'ScaleOps', change: "Homepage hero text changed from 'Cloud Management' to 'AI-Native Infrastructure'", time: '5h ago', type: 'positioning' as const },
+  ]);
+
+  const [insights, setInsights] = useState([
+    { title: 'Pricing Pressure detected', description: 'CloudMetrics added a mid-tier plan that undercuts your Professional tier by 15%. Recommend reviewing value proposition.', impact: 'high' as const },
+    { title: 'New Feature Opportunity', description: "Competitors are increasingly focusing on 'Native SOC2 Compliance' as a marketing hook. Your product already has this but isn't highlighting it.", impact: 'medium' as const },
   ]);
 
   const [newUrl, setNewUrl] = useState('');
@@ -112,8 +121,30 @@ export const Dashboard = () => {
     const name = newUrl.replace('https://', '').replace('http://', '').split('.')[0];
     const capitalizedName = name.charAt(0).toUpperCase() + name.slice(1);
 
+    // Add to competitors
     setCompetitors(prev => [
-      { name: capitalizedName, score: Math.floor(Math.random() * 40) + 30, url: newUrl, status: 'active' },
+      { name: capitalizedName, score: Math.floor(Math.random() * 40) + 50, url: newUrl, status: 'active' },
+      ...prev
+    ]);
+
+    // Add dynamic activity
+    setActivities(prev => [
+      { 
+        company: capitalizedName, 
+        change: `Detected significant messaging shift on ${capitalizedName}'s homepage regarding AI integration.`, 
+        time: 'Just now', 
+        type: 'positioning' 
+      },
+      ...prev
+    ]);
+
+    // Add dynamic insight
+    setInsights(prev => [
+      { 
+        title: `Opportunity: ${capitalizedName} Market Gap`, 
+        description: `Analysis of ${newUrl} shows a lack of focus on enterprise security features. This is your chance to double down on your security-first messaging.`, 
+        impact: 'high' 
+      },
       ...prev
     ]);
 
@@ -230,8 +261,8 @@ export const Dashboard = () => {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
           { label: 'Tracked Rivals', value: competitors.length.toString(), icon: Activity, trend: '+1', trendUp: true, color: 'text-blue-500' },
-          { label: 'Site Updates', value: '48', icon: Globe, trend: '+12%', trendUp: true, color: 'text-emerald-500' },
-          { label: 'AI Insights', value: '7', icon: Zap, trend: '-1', trendUp: false, color: 'text-amber-500' },
+          { label: 'Site Updates', value: (activities.length * 4).toString(), icon: Globe, trend: '+12%', trendUp: true, color: 'text-emerald-500' },
+          { label: 'AI Insights', value: insights.length.toString(), icon: Zap, trend: '+1', trendUp: true, color: 'text-amber-500' },
           { label: 'Market Share', value: '24%', icon: TrendingUp, trend: '+0.5%', trendUp: true, color: 'text-purple-500' },
         ].map((stat, i) => (
           <div key={i} className="relative group overflow-hidden flex flex-col gap-1 p-7 rounded-[2rem] border bg-card/50 backdrop-blur-sm hover:border-primary/20 transition-all hover:shadow-xl hover:shadow-primary/5">
@@ -263,24 +294,9 @@ export const Dashboard = () => {
           className="md:col-span-8 lg:col-span-7 bg-gradient-to-br from-card/50 to-background/50"
         >
           <div className="flex flex-col gap-1 -mx-2">
-            <ActivityItem 
-              company="CloudMetrics" 
-              change="Pricing page updated: New 'Enterprise' tier added at $499/mo" 
-              time="24m ago"
-              type="pricing"
-            />
-            <ActivityItem 
-              company="DataFlow AI" 
-              change="Released new 'Predictive Analytics' module with Snowflake integration" 
-              time="2h ago"
-              type="feature"
-            />
-            <ActivityItem 
-              company="ScaleOps" 
-              change="Homepage hero text changed from 'Cloud Management' to 'AI-Native Infrastructure'" 
-              time="5h ago"
-              type="positioning"
-            />
+            {activities.map((act, i) => (
+              <ActivityItem key={i} {...act} />
+            ))}
           </div>
           <button className="w-full mt-6 py-3 text-sm font-bold text-muted-foreground hover:text-primary transition-all border border-dashed rounded-2xl border-border hover:border-primary/50 hover:bg-primary/5">
             View All Activity
@@ -294,16 +310,9 @@ export const Dashboard = () => {
           className="md:col-span-4 lg:col-span-5 bg-gradient-to-tr from-amber-500/[0.02] to-card"
         >
           <div className="flex flex-col gap-4">
-            <InsightCard 
-              title="Pricing Pressure detected"
-              description="CloudMetrics added a mid-tier plan that undercuts your Professional tier by 15%. Recommend reviewing value proposition."
-              impact="high"
-            />
-            <InsightCard 
-              title="New Feature Opportunity"
-              description="Competitors are increasingly focusing on 'Native SOC2 Compliance' as a marketing hook. Your product already has this but isn't highlighting it."
-              impact="medium"
-            />
+            {insights.map((ins, i) => (
+              <InsightCard key={i} {...ins} />
+            ))}
           </div>
         </BentoCard>
 
