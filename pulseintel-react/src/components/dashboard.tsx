@@ -1,20 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Activity, 
-  Search, 
   ArrowUpRight, 
   Globe,
   Zap,
-  Shield,
   Plus,
   Loader2,
   CheckCircle2,
   Trash2,
   Moon,
   Sun,
-  X,
   Sparkles,
-  BarChart3,
   Target,
   Trophy,
   SearchCode,
@@ -121,10 +117,14 @@ export const Dashboard = () => {
       await new Promise(resolve => setTimeout(resolve, 1500));
     }
 
-    const compName = inputUrl.replace('https://', '').replace('http://', '').split('.')[0];
-    const capitalizedComp = compName.charAt(0).toUpperCase() + compName.slice(1);
-    const userName = userUrl.replace('https://', '').replace('http://', '').split('.')[0];
-    const capitalizedUser = userName.charAt(0).toUpperCase() + userName.slice(1);
+    const extractName = (url: string) => {
+      let hostname = url.replace(/^(https?:\/\/)?(www\.)?/, "").split("/")[0];
+      let domain = hostname.split(".")[0];
+      return domain.charAt(0).toUpperCase() + domain.slice(1);
+    };
+
+    const capitalizedComp = extractName(inputUrl);
+    const capitalizedUser = extractName(userUrl);
     
     const id = Math.random().toString(36).substr(2, 9);
 
@@ -155,7 +155,7 @@ export const Dashboard = () => {
     setSeoGaps(prev => [{
       id: Math.random().toString(36).substr(2, 9),
       competitor: capitalizedComp,
-      gap: `They are ranking #1 for '${compName} alternatives' and 'best ${compName} software'. You are missing these high-intent bottom-of-funnel pages.`,
+      gap: `They are ranking #1 for '${capitalizedComp.toLowerCase()} alternatives' and 'best ${capitalizedComp.toLowerCase()} software'. You are missing these high-intent bottom-of-funnel pages.`,
       suggestion: `Create a '${capitalizedUser} vs ${capitalizedComp}' comparison landing page immediately.`
     }, ...prev]);
 
