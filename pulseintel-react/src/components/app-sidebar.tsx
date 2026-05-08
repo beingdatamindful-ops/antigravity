@@ -1,10 +1,8 @@
 import * as React from "react"
 import {
-  BookOpen,
   Bot,
   Command,
   LayoutDashboard as Terminal,
-  Plus,
 } from "lucide-react"
 
 import {
