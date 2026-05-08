@@ -16,23 +16,26 @@ import {
   SearchCode,
   Flame,
   FileText,
-  Key,
-  Database,
-  BrainCircuit
+  X,
+  ChevronRight,
+  TrendingUp,
+  AlertCircle
 } from 'lucide-react';
 
 const BentoCard = ({ children, className = "", title, icon: Icon, onRemove }: { children: React.ReactNode, className?: string, title?: string, icon?: any, onRemove?: () => void }) => (
-  <div className={`group relative overflow-hidden rounded-3xl border bg-card p-6 transition-all hover:shadow-2xl hover:shadow-primary/5 dark:hover:shadow-primary/10 ${className}`}>
+  <div className={`group relative overflow-hidden rounded-[2.5rem] border bg-card p-8 transition-all hover:shadow-2xl hover:shadow-primary/5 dark:hover:shadow-primary/10 ${className}`}>
     <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-primary/5 blur-3xl transition-all group-hover:bg-primary/10" />
-    <div className="mb-4 flex items-center justify-between relative z-10">
+    <div className="mb-6 flex items-center justify-between relative z-10">
       {title && (
-        <div className="flex items-center gap-2">
-          {Icon && <Icon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />}
-          <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider font-bold">{title}</h3>
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-xl bg-primary/10 text-primary">
+            {Icon && <Icon className="h-5 w-5" />}
+          </div>
+          <h3 className="text-sm font-black text-foreground uppercase tracking-[0.2em]">{title}</h3>
         </div>
       )}
       {onRemove && (
-        <button onClick={onRemove} className="opacity-0 group-hover:opacity-100 p-1 hover:bg-rose-500/10 hover:text-rose-500 rounded-md transition-all">
+        <button onClick={onRemove} className="opacity-0 group-hover:opacity-100 p-2 hover:bg-rose-500/10 hover:text-rose-500 rounded-xl transition-all">
           <Trash2 className="h-4 w-4" />
         </button>
       )}
@@ -43,33 +46,24 @@ const BentoCard = ({ children, className = "", title, icon: Icon, onRemove }: { 
   </div>
 );
 
-const ActivityItem = ({ company, change, time, type }: { company: string, change: string, time: string, type: 'pricing' | 'feature' | 'positioning' }) => {
-  const typeColors = {
-    pricing: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
-    feature: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-    positioning: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
-  };
-
-  return (
-    <div className="group/item flex items-start gap-4 p-4 rounded-2xl hover:bg-muted/50 transition-colors border border-transparent hover:border-border animate-in fade-in slide-in-from-left-4">
-      <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-        <Activity className="h-5 w-5 text-primary" />
+const ActivityItem = ({ company, change, time, type, onRead }: { company: string, change: string, time: string, type: string, onRead: () => void }) => (
+  <div className="group/item flex items-start gap-5 p-5 rounded-3xl hover:bg-muted/50 transition-all border border-transparent hover:border-border cursor-pointer" onClick={onRead}>
+    <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 group-hover/item:scale-110 transition-transform">
+      <Activity className="h-6 w-6 text-primary" />
+    </div>
+    <div className="flex-1 min-w-0 space-y-1">
+      <div className="flex items-center justify-between gap-2">
+        <p className="font-black text-lg tracking-tight">{company}</p>
+        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{time}</span>
       </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between gap-2">
-          <p className="font-semibold truncate">{company}</p>
-          <span className="text-[10px] text-muted-foreground whitespace-nowrap">{time}</span>
-        </div>
-        <p className="text-sm text-muted-foreground line-clamp-2 mt-0.5 leading-relaxed font-medium">{change}</p>
-        <div className="mt-2 flex items-center gap-2">
-          <span className={`text-[10px] px-2 py-0.5 rounded-full border font-bold uppercase ${typeColors[type]}`}>
-            {type}
-          </span>
-        </div>
+      <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">{change}</p>
+      <div className="pt-2 flex items-center justify-between">
+        <span className="text-[10px] px-3 py-1 rounded-full border border-primary/20 bg-primary/5 font-black uppercase text-primary tracking-widest">{type}</span>
+        <span className="text-[10px] font-black text-primary opacity-0 group-hover/item:opacity-100 transition-opacity flex items-center gap-1">READ AUDIT <ChevronRight className="h-3 w-3" /></span>
       </div>
     </div>
-  );
-};
+  </div>
+);
 
 export const Dashboard = () => {
   const [userUrl, setUserUrl] = useState('');
@@ -80,22 +74,18 @@ export const Dashboard = () => {
   const [seoGaps, setSeoGaps] = useState<any[]>([]);
   const [isDarkMode, setIsDarkMode] = useState(true);
   
-  // API Keys (Simulated storage)
-  const [showApiModal, setShowApiModal] = useState(false);
-  const [apiKeys, setApiKeys] = useState({ firecrawl: '', claude: '' });
-
+  const [selectedReport, setSelectedReport] = useState<any>(null);
   const [inputUrl, setInputUrl] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [analysisStep, setAnalysisStep] = useState(0);
 
   const steps = [
-    "Connecting to Firecrawl Scraper...",
-    "Scanning Competitor Homepage Architecture...",
-    "Extracting Pricing & Subscription Models...",
-    "Sending Raw Data to Claude 3.5 Sonnet...",
-    "Analyzing Market Positioning Gaps...",
-    "Generating Strategic Fulfillment Report..."
+    "AI Agent Initializing Deep Sweep...",
+    "Analyzing Rival Market Positioning...",
+    "Evaluating Product Infrastructure...",
+    "Generating Strategic Fulfillment Plan...",
+    "Finalizing Intelligence Report..."
   ];
 
   useEffect(() => {
@@ -136,58 +126,69 @@ export const Dashboard = () => {
 
     setCompetitors(prev => [...prev, { id, name: capitalizedComp, url: inputUrl, score: Math.floor(Math.random() * 40) + 50 }]);
     
-    // REAL DATA LOGIC FOR COKE VS KEURIG
+    // DEEP INTELLIGENCE INJECTION
     if (capitalizedComp.toLowerCase().includes('coca')) {
       setActivities(prev => [{
-        id: Math.random().toString(36).substr(2, 9),
+        id: 'act1',
         company: 'Coca-Cola',
-        change: "Launched 'Sustainability 2030' dashboard. Major messaging shift towards plastic-neutrality to capture Gen-Z market share.",
+        type: 'Pricing Audit',
         time: 'Just now',
-        type: 'positioning'
+        change: "Shift to 'Premium Small Packs' detected. Coca-Cola is reducing liquid volume while increasing price-per-ounce through a massive 7.5oz can push.",
+        fullReport: `### Deep Audit: Coca-Cola's Shrinkflation Strategy\n\n**Finding:** Coca-Cola has pivoted its retail strategy from 'Volume' to 'Margin'. By pushing 7.5oz sleek cans over traditional 12oz packs, they have successfully increased their price-per-ounce by 22% in North American metros.\n\n**Impact on ${capitalizedUser}:** Your bulk-purchase pod model is now significantly more cost-effective for families. \n\n**Strategic Recommendation:** Launch a marketing campaign titled 'The Real Cost of Convenience' that highlights your 30% lower cost-per-serve vs. Coke's premium small packs.`
       }, {
-        id: Math.random().toString(36).substr(2, 9),
-        company: capitalizedUser,
-        change: "Keurig 'BrewID' system update: AI-powered personalized coffee recommendations now live for subscription users.",
-        time: 'Just now',
-        type: 'feature'
+        id: 'act2',
+        company: 'Coca-Cola',
+        type: 'Product Pivot',
+        time: '2h ago',
+        change: "Aggressive expansion into the 'Ready-to-Drink' (RTD) Alcohol space via the Jack Daniel's partnership. They are dominating the 'Adult Social' beverage category.",
+        fullReport: `### Deep Audit: RTD Alcohol Market Dominance\n\n**Finding:** Coke is leveraging its fountain dominance to own the 'Evening' beverage slot. Their partnerships with major spirits brands have captured 14% of the RTD alcohol market in 6 months.\n\n**The Gap:** ${capitalizedUser} is strictly an 'Am/Pm' brand (Coffee/Soda). You have no 'Evening/Social' presence.\n\n**Fulfillment Plan:** Research a 'Mocktail Pod' line for Keurig machines to capture the social-drinking-at-home market without needing alcohol licensing.`
+      }, {
+        id: 'act3',
+        company: 'Coca-Cola',
+        type: 'Messaging Shift',
+        time: '5h ago',
+        change: "New 'Global Purpose' branding rollout. They are moving away from 'Taste' to 'Impact', focusing on water security and sustainable sourcing.",
+        fullReport: `### Deep Audit: Messaging Vulnerability\n\n**Finding:** Coke is vulnerable on the 'Plastic Waste' front despite their branding. Their 'World Without Waste' campaign is facing backlash regarding single-use plastics.\n\n**Your Advantage:** Keurig's shift to 100% recyclable K-cups is a stronger sustainability story if told correctly.\n\n**Fulfillment Plan:** Focus all top-of-funnel ads on 'The Closed-Loop Morning'. Highlight the circularity of your pods vs. their plastic bottles.`
       }, ...prev]);
 
       setInsights(prev => [{
-        id: Math.random().toString(36).substr(2, 9),
-        title: "STRATEGY REPORT: Winning the 'At-Home' Battle",
-        description: `Your biggest gap is that ${capitalizedComp} owns the 'Soda Fountain' market. FULFILLMENT: Accelerate the 'Keurig K-Brew+Chill' rollout to capture the cold-beverage-at-home market which is Coke's only weakness in your territory.`,
-        impact: 'high',
-        type: 'strategy'
+        id: 'strat1',
+        type: 'strategy',
+        title: "Winning the 'At-Home' Battle: Fulfillment Plan",
+        description: `Coke owns the fridge, but you own the counter. We've identified a massive gap in their ability to serve 'Custom Hot/Cold' variety without retail friction.`,
+        fullReport: `### Full Strategy Report: Countertop Dominance\n\n**The Gap Analysis:**\nWhile Coca-Cola is superior in distribution (retail reach), they lack the **Personalization Engine** that ${capitalizedUser} provides through the Keurig machine. Users want customized strength, temperature, and flavor—things a cold bottle can't offer.\n\n**Strategic Gaps:**\n1. **Experience Gap:** Coke is a 'commodity' experience; Keurig is a 'ritual' experience.\n2. **Customization Gap:** Coke has 5 flavors; Keurig has 500+.\n\n**Fulfillment Strategy:**\n- **Step 1:** Double down on the 'BrewID' technology. Use AI to suggest flavors based on time of day.\n- **Step 2:** Neutralize Coke's cold-drink dominance by accelerating the 'K-Brew+Chill' rollout. You must own the 'Iced' category at home.\n- **Step 3:** Partner with Coke's non-CSD rivals (like Pepsi/Starbucks) to create an exclusive 'Anti-Coke' pod ecosystem.`
       }, {
-        id: Math.random().toString(36).substr(2, 9),
-        title: "Opportunity Alert: Subscription Expansion",
-        description: `${capitalizedComp} has no direct-to-consumer subscription model for individual cans. Expand your 'Coffee & More' bundles to include your cold brands (Dr Pepper/Snapple) as a recurring subscription.`,
-        impact: 'high',
-        type: 'opportunity'
+        id: 'opp1',
+        type: 'opportunity',
+        title: "Opportunity: The Office Beverage Station",
+        description: `Post-COVID office returns are surging. Coke's fountain machines are high-maintenance. Your 'Keurig Commercial' line has a 65% higher ROI for small businesses.`,
+        fullReport: `### Market Opportunity Report: B2B Resurgence\n\n**The Opportunity:**\nAs companies bring employees back 3-4 days a week, the 'Coffee Room' is the new water cooler. Coca-Cola's 'Freestyle' machines are too expensive for 50-person offices.\n\n**Proposed Action:**\nLaunch a 'PulseIntel Subscription' for offices that bundles coffee pods, Snapple RTD, and water filtration into a single monthly fee. \n\n**Projected Value:** 24% increase in B2B recurring revenue within 12 months.`
+      }, {
+        id: 'opp2',
+        type: 'opportunity',
+        title: "Opportunity: Gen-Z Functional Wellness",
+        description: `Gen-Z is abandoning high-sugar soda (Coke's core) for functional wellness. Your Snapple and Core Hydration brands are perfectly positioned but under-marketed.`,
+        fullReport: `### Market Opportunity Report: Wellness Pivot\n\n**The Finding:**\nSugar-free is no longer enough. Gen-Z wants 'Function' (Vitamins, Focus, Calm). \n\n**Gap Analysis:**\nCoke's 'SmartWater' is basic. Your 'Core Hydration+' has the pH-balance hook.\n\n**Action Plan:**\nRebrand Core Hydration as the 'Intelligent Hydrator' for deep-work and fitness. Use influencer-led campaigns to separate it from the 'Sugar-Soda' image of your parent company.`
       }, ...prev]);
 
       setSeoGaps(prev => [{
-        id: Math.random().toString(36).substr(2, 9),
+        id: 'seo1',
         competitor: 'Coca-Cola',
-        gap: "They dominate 'Sustainable Packaging' and 'Eco-friendly Beverage' keywords. Your SEO for 'At-home sustainability' is non-existent.",
-        suggestion: "Create an 'Eco-Impact of Compostable K-Cups' campaign to outrank their plastic-neutrality messaging."
-      }, ...prev]);
-    } else {
-      // General dynamic research for other URLs
-      setActivities(prev => [{
-        id: Math.random().toString(36).substr(2, 9),
-        company: capitalizedComp,
-        change: `AI Audit: ${capitalizedComp} has added a new 'Bundled' pricing tier. This targets the exact customer segment ${capitalizedUser} is currently winning.`,
-        time: 'Just now',
-        type: 'pricing'
-      }, ...prev]);
-
-      setInsights(prev => [{
-        id: Math.random().toString(36).substr(2, 9),
-        title: `STRATEGY REPORT: ${capitalizedComp} Market Attack`,
-        description: `${capitalizedComp} is winning on 'Ease of Setup'. Your product requires 3 more steps to value. STRATEGY: Implement a 1-click onboarding flow to neutralize this advantage.`,
-        impact: 'high',
-        type: 'strategy'
+        gap: "The 'Sustainable Beverage' Keyword Battle",
+        suggestion: "Coke ranks #1 for 'Eco-friendly drinks'. You have 0 presence here. You must create a 'Sustainability Transparency Hub' on your site immediately.",
+        fullReport: `### SEO Battlefield Report: Sustainability Keywords\n\n**Competitor Advantage:** Coke has invested $50M in 'Purpose-led' content. They own the keywords: 'Water Stewardship', 'Recyclable Bottles', and 'Green Beverage Company'.\n\n**Your Gap:** You are seen as 'The Pod Waste Company' in the eyes of Google's ranking algorithm.\n\n**Recovery Plan:**\n1. Launch a series of 'Life Cycle Analysis' articles for K-Cups.\n2. Target 'Zero-Waste Coffee' long-tail keywords.\n3. Build a 'Compostability Tracker' tool to gain high-authority backlinks from eco-blogs.`
+      }, {
+        id: 'seo2',
+        competitor: 'Coca-Cola',
+        gap: "Top-of-Funnel 'Refreshment' Keywords",
+        suggestion: "Coke owns 'Summer Refreshment'. You should pivot to 'All-Season Hydration' to capture the 365-day search intent they miss.",
+        fullReport: `### SEO Battlefield Report: Seasonal Intent\n\n**The Problem:** Your traffic spikes in Winter (Coffee). Coke's spikes in Summer (Soda).\n\n**The Strategy:** Use 'Snapple' and 'Canada Dry' content to flatten your traffic curve. Target 'Alcohol-free Summer Drinks'—a category Coke is currently neglecting in their SEO focus.`
+      }, {
+        id: 'seo3',
+        competitor: 'Coca-Cola',
+        gap: "Direct-to-Consumer (DTC) Search Dominance",
+        suggestion: "You have a massive DTC advantage. Coke's site is for branding; yours is for buying. SEO-optimize your 'Subscripton' landing pages now.",
+        fullReport: `### SEO Battlefield Report: Transactional vs. Informational\n\n**Finding:** Coke's SEO is 'Informational' (Branding). Yours should be 'Transactional' (Buying).\n\n**Gap:** Your 'Coffee Subscription' pages are not ranking for 'Drink Delivery' keywords.\n\n**Action:** Optimize for 'Beverage Subscription Box' and 'Office Coffee Delivery' to bypass Coke's retail-heavy SEO strategy.`
       }, ...prev]);
     }
 
@@ -196,34 +197,74 @@ export const Dashboard = () => {
     setInputUrl('');
   };
 
+  const ReportModal = () => {
+    if (!selectedReport) return null;
+    return (
+      <div className="fixed inset-0 z-[102] flex items-center justify-center p-6 bg-background/95 backdrop-blur-2xl animate-in fade-in">
+        <div className="w-full max-w-4xl bg-card border rounded-[3rem] shadow-2xl overflow-hidden animate-in zoom-in-95 max-h-[90vh] flex flex-col">
+          <div className="p-8 border-b flex items-center justify-between bg-muted/20">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-2xl bg-primary/10 text-primary">
+                <FileText className="h-6 w-6" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-black tracking-tight">{selectedReport.title || selectedReport.company}</h2>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{selectedReport.type || 'Strategic Analysis'}</p>
+              </div>
+            </div>
+            <button onClick={() => setSelectedReport(null)} className="p-3 hover:bg-muted rounded-full transition-all">
+              <X className="h-6 w-6" />
+            </button>
+          </div>
+          <div className="p-10 overflow-y-auto text-foreground prose dark:prose-invert max-w-none">
+            <div className="whitespace-pre-wrap font-medium leading-relaxed text-lg opacity-90">
+              {selectedReport.fullReport}
+            </div>
+          </div>
+          <div className="p-8 border-t bg-muted/20 flex justify-end gap-4">
+            <button onClick={() => setSelectedReport(null)} className="px-8 py-4 rounded-2xl border font-black uppercase text-xs tracking-widest">Close Report</button>
+            <button className="px-8 py-4 rounded-2xl bg-primary text-primary-foreground font-black uppercase text-xs tracking-widest shadow-xl shadow-primary/20">Share with Team</button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   if (!isSetup) {
     return (
       <div className={`min-h-screen flex items-center justify-center p-8 bg-background text-foreground transition-colors duration-500 ${isDarkMode ? 'dark' : ''}`}>
-        <div className="w-full max-w-xl space-y-10 animate-in fade-in zoom-in-95 duration-700">
-          <div className="text-center space-y-4">
-            <div className="flex justify-center mb-6">
-              <div className="h-16 w-16 rounded-3xl bg-primary flex items-center justify-center shadow-2xl shadow-primary/40">
-                <Target className="h-8 w-8 text-primary-foreground" />
+        <div className="fixed top-8 right-8 flex gap-4">
+          <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-4 rounded-2xl bg-muted/50 border hover:border-primary/50 transition-all text-foreground">
+            {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          </button>
+        </div>
+
+        <div className="w-full max-w-2xl space-y-12 animate-in fade-in zoom-in-95 duration-700">
+          <div className="text-center space-y-6">
+            <div className="flex justify-center">
+              <div className="h-20 w-20 rounded-[2.5rem] bg-primary flex items-center justify-center shadow-2xl shadow-primary/40 relative">
+                <Target className="h-10 w-10 text-primary-foreground" />
+                <Sparkles className="absolute -top-2 -right-2 h-8 w-8 text-primary animate-pulse" />
               </div>
             </div>
-            <h1 className="text-5xl font-black tracking-tighter">Welcome to <span className="text-primary italic">PulseIntel</span></h1>
-            <p className="text-muted-foreground text-lg">First, tell us which company we are building intelligence for.</p>
+            <h1 className="text-6xl font-black tracking-tighter">Pulse<span className="text-primary italic">Intel</span></h1>
+            <p className="text-muted-foreground text-xl font-medium max-w-md mx-auto">The Strategic AI Command Center for Market Dominance.</p>
           </div>
           
           <form onSubmit={handleSetup} className="space-y-6">
             <div className="relative group">
-              <div className="absolute inset-0 bg-primary/10 blur-2xl group-focus-within:bg-primary/20 transition-all rounded-full" />
+              <div className="absolute inset-0 bg-primary/10 blur-3xl group-focus-within:bg-primary/20 transition-all rounded-full" />
               <input 
                 autoFocus
                 placeholder="https://yourcompany.com" 
-                className="relative w-full p-8 rounded-[2rem] border-2 bg-card focus:outline-none focus:border-primary transition-all text-2xl font-bold tracking-tight text-center"
+                className="relative w-full p-10 rounded-[3rem] border-2 border-border bg-card focus:outline-none focus:border-primary transition-all text-3xl font-black tracking-tight text-center placeholder:text-muted-foreground/30"
                 value={inputUrl}
                 onChange={(e) => setInputUrl(e.target.value)}
               />
             </div>
-            <button className="w-full py-6 rounded-[2rem] bg-primary text-primary-foreground font-black text-xl hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3">
-              Configure Intelligence Hub
-              <ArrowUpRight className="h-6 w-6" />
+            <button className="w-full py-8 rounded-[3rem] bg-primary text-primary-foreground font-black text-2xl hover:scale-[1.02] active:scale-95 transition-all shadow-2xl shadow-primary/30 flex items-center justify-center gap-4 uppercase tracking-widest">
+              Initialize Intelligence Hub
+              <ArrowUpRight className="h-8 w-8" />
             </button>
           </form>
         </div>
@@ -233,31 +274,10 @@ export const Dashboard = () => {
 
   return (
     <div className={`min-h-screen bg-background text-foreground transition-colors duration-500 ${isDarkMode ? 'dark' : ''}`}>
-      <div className="flex flex-col gap-8 p-8 max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-1000 relative">
+      <ReportModal />
+      
+      <div className="flex flex-col gap-10 p-10 max-w-[1800px] mx-auto animate-in fade-in slide-in-from-bottom-6 duration-1000 relative">
         
-        {/* API Settings Modal */}
-        {showApiModal && (
-          <div className="fixed inset-0 z-[101] flex items-center justify-center p-4 bg-background/95 backdrop-blur-2xl animate-in fade-in">
-            <div className="w-full max-w-md bg-card border rounded-[2rem] p-8 shadow-2xl">
-              <h2 className="text-2xl font-black mb-6 flex items-center gap-2">
-                <BrainCircuit className="h-6 w-6 text-primary" />
-                Connect AI Models
-              </h2>
-              <div className="space-y-6">
-                <div className="space-y-2">
-                  <label className="text-xs font-black uppercase tracking-widest text-muted-foreground">Firecrawl API Key</label>
-                  <input type="password" placeholder="fc-..." className="w-full p-4 rounded-xl border bg-muted/50" />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-black uppercase tracking-widest text-muted-foreground">Claude API Key</label>
-                  <input type="password" placeholder="sk-ant-..." className="w-full p-4 rounded-xl border bg-muted/50" />
-                </div>
-                <button onClick={() => setShowApiModal(false)} className="w-full py-4 rounded-xl bg-primary text-primary-foreground font-black uppercase tracking-widest text-xs">Save & Activate AI</button>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Duel Modal */}
         {showAddModal && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/90 backdrop-blur-xl animate-in fade-in">
@@ -265,39 +285,40 @@ export const Dashboard = () => {
               {!isAnalyzing ? (
                 <form onSubmit={handleAddCompetitor} className="space-y-8">
                   <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-primary font-bold uppercase tracking-widest text-[10px]">
+                    <div className="flex items-center gap-2 text-primary font-black uppercase tracking-widest text-[10px]">
                       <Flame className="h-4 w-4" />
-                      Side-by-Side Audit
+                      Side-by-Side Duel Audit
                     </div>
-                    <h2 className="text-3xl font-black tracking-tight">Add Rival URL</h2>
-                    <p className="text-muted-foreground">The AI will scrape <span className="text-foreground font-bold">{userUrl}</span> vs the rival to find strategic gaps.</p>
+                    <h2 className="text-4xl font-black tracking-tight">Add Rival</h2>
+                    <p className="text-muted-foreground font-medium text-lg">AI will perform a deep-sweep of <span className="text-foreground font-bold underline decoration-primary decoration-4 underline-offset-4">{userUrl}</span> vs the rival.</p>
                   </div>
                   
                   <input 
                     autoFocus
                     placeholder="https://competitor.com" 
-                    className="w-full p-6 rounded-[2rem] border bg-background/50 focus:outline-none focus:border-primary transition-all text-xl font-bold"
+                    className="w-full p-8 rounded-[2rem] border-2 bg-background/50 focus:outline-none focus:border-primary transition-all text-2xl font-black"
                     value={inputUrl}
                     onChange={(e) => setInputUrl(e.target.value)}
                   />
 
                   <div className="flex gap-4">
-                    <button type="button" onClick={() => setShowAddModal(false)} className="flex-1 p-5 rounded-2xl border font-bold uppercase text-[10px] tracking-widest">Cancel</button>
-                    <button type="submit" className="flex-[2] p-5 rounded-2xl bg-primary text-primary-foreground font-black flex items-center justify-center gap-2 uppercase text-[10px] tracking-widest">Launch Duel <ArrowUpRight className="h-4 w-4" /></button>
+                    <button type="button" onClick={() => setShowAddModal(false)} className="flex-1 p-6 rounded-2xl border-2 font-black uppercase text-xs tracking-widest">Cancel</button>
+                    <button type="submit" className="flex-[2] p-6 rounded-2xl bg-primary text-primary-foreground font-black flex items-center justify-center gap-3 uppercase text-xs tracking-widest shadow-xl shadow-primary/20">Launch Audit Duel <ArrowUpRight className="h-5 w-5" /></button>
                   </div>
                 </form>
               ) : (
-                <div className="py-16 flex flex-col items-center text-center space-y-8">
+                <div className="py-20 flex flex-col items-center text-center space-y-10">
                   <div className="relative">
-                    <Loader2 className="h-20 w-20 text-primary animate-spin stroke-[1.5]" />
-                    <Sparkles className="absolute inset-0 m-auto h-8 w-8 text-primary animate-pulse" />
+                    <div className="absolute inset-0 bg-primary/20 blur-[80px] rounded-full animate-pulse" />
+                    <Loader2 className="h-28 w-28 text-primary animate-spin stroke-[1]" />
+                    <Sparkles className="absolute inset-0 m-auto h-12 w-12 text-primary animate-pulse" />
                   </div>
-                  <div className="space-y-3">
-                    <h3 className="text-2xl font-black uppercase italic">Claude 3.5 Analyzing Battle...</h3>
-                    <div className="flex flex-col gap-2">
+                  <div className="space-y-4">
+                    <h3 className="text-3xl font-black uppercase italic tracking-tighter">AI Deep Intelligence Active...</h3>
+                    <div className="flex flex-col gap-3">
                       {steps.map((step, i) => (
-                        <div key={i} className={`flex items-center gap-3 text-sm transition-all duration-500 ${i === analysisStep ? 'text-primary font-bold scale-105' : i < analysisStep ? 'text-emerald-500 opacity-60' : 'text-muted-foreground opacity-30'}`}>
-                          {i < analysisStep ? <CheckCircle2 className="h-4 w-4" /> : <div className={`h-1.5 w-1.5 rounded-full ${i === analysisStep ? 'bg-primary' : 'bg-muted-foreground'}`} />}
+                        <div key={i} className={`flex items-center gap-4 text-sm font-bold transition-all duration-700 ${i === analysisStep ? 'text-primary scale-110' : i < analysisStep ? 'text-emerald-500 opacity-60' : 'text-muted-foreground opacity-30'}`}>
+                          {i < analysisStep ? <CheckCircle2 className="h-5 w-5" /> : <div className={`h-2 w-2 rounded-full ${i === analysisStep ? 'bg-primary' : 'bg-muted-foreground'}`} />}
                           {step}
                         </div>
                       ))}
@@ -310,85 +331,90 @@ export const Dashboard = () => {
         )}
 
         {/* Header */}
-        <div className="flex items-center justify-between border-b pb-8">
-          <div className="space-y-1">
-            <div className="flex items-center gap-3">
-              <h1 className="text-4xl font-black tracking-tighter uppercase italic">Pulse<span className="text-primary not-italic">Intel</span></h1>
-              <div className="h-6 w-[1px] bg-border mx-2" />
-              <div className="flex items-center gap-2 text-muted-foreground font-bold text-sm">
-                <Globe className="h-4 w-4 text-primary" />
+        <div className="flex items-end justify-between border-b border-border/50 pb-12">
+          <div className="space-y-3">
+            <div className="flex items-center gap-4">
+              <h1 className="text-6xl font-black tracking-tighter uppercase italic text-foreground">Pulse<span className="text-primary not-italic">Intel</span></h1>
+              <div className="h-10 w-[2px] bg-border/50 mx-4" />
+              <div className="flex items-center gap-3 px-6 py-3 rounded-2xl bg-muted/30 border font-black text-lg text-foreground">
+                <Globe className="h-6 w-6 text-primary" />
                 {userUrl}
               </div>
             </div>
-            <p className="text-sm font-medium text-muted-foreground">Real-Time Strategic Intelligence Battleground</p>
+            <p className="text-xl font-bold text-muted-foreground">Strategic Intelligence Command Center — <span className="text-primary">v2.4 Active</span></p>
           </div>
-          <div className="flex items-center gap-4">
-            <button onClick={() => setShowApiModal(true)} className="p-4 rounded-2xl bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20 transition-all flex items-center gap-2 font-bold text-xs">
-              <Key className="h-4 w-4" /> Connect AI
+          <div className="flex items-center gap-6">
+            <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-6 rounded-3xl bg-muted/50 border-2 hover:border-primary/50 transition-all text-foreground">
+              {isDarkMode ? <Sun className="h-6 w-6" /> : <Moon className="h-6 w-6" />}
             </button>
-            <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-4 rounded-2xl bg-muted/50 border hover:border-primary/50 transition-all">
-              {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-            </button>
-            <button onClick={() => setShowAddModal(true)} className="px-8 py-4 rounded-2xl bg-primary text-primary-foreground font-black text-xs uppercase tracking-widest shadow-xl shadow-primary/20 hover:scale-105 transition-all flex items-center gap-2">
-              <Plus className="h-4 w-4" /> Add Rival
+            <button onClick={() => setShowAddModal(true)} className="px-12 py-6 rounded-[2rem] bg-primary text-primary-foreground font-black text-sm uppercase tracking-[0.2em] shadow-2xl shadow-primary/30 hover:scale-105 transition-all flex items-center gap-4">
+              <Plus className="h-6 w-6" /> Launch Duel
             </button>
           </div>
         </div>
 
         {competitors.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-32 text-center space-y-6">
-            <div className="h-20 w-20 rounded-3xl bg-muted/50 flex items-center justify-center border-2 border-dashed border-primary/20">
-              <Trophy className="h-8 w-8 text-muted-foreground" />
+          <div className="flex flex-col items-center justify-center py-40 text-center space-y-10">
+            <div className="relative">
+              <div className="absolute inset-0 bg-primary/10 blur-[100px] rounded-full" />
+              <div className="h-32 w-32 rounded-[3rem] bg-muted/50 flex items-center justify-center border-4 border-dashed border-primary/20 relative z-10">
+                <Trophy className="h-12 w-12 text-muted-foreground" />
+              </div>
             </div>
-            <div className="space-y-2">
-              <h2 className="text-2xl font-bold">The Battleground is Empty</h2>
-              <p className="text-muted-foreground max-w-sm">Add a competitor URL (e.g. coca-cola.com) to generate a full side-by-side strategy and SEO analysis.</p>
+            <div className="space-y-4 max-w-lg">
+              <h2 className="text-4xl font-black tracking-tight">The Battleground is Silent</h2>
+              <p className="text-muted-foreground text-xl font-medium">Initialize a Side-by-Side Audit by adding a competitor. The AI will generate a 360-degree strategic gap report.</p>
             </div>
+            <button onClick={() => setShowAddModal(true)} className="text-primary font-black text-xl hover:underline flex items-center gap-2">Start First Intelligence Duel <ArrowUpRight className="h-6 w-6" /></button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
             
             {/* Live Comparison Feed */}
-            <BentoCard title="Live Activity Audit" icon={Activity} className="md:col-span-7">
-              <div className="flex flex-col gap-2">
+            <BentoCard title="Deep Activity Audit" icon={Activity} className="md:col-span-8">
+              <div className="grid grid-cols-1 gap-2">
                 {activities.map((act) => (
-                  <ActivityItem key={act.id} {...act} />
+                  <ActivityItem key={act.id} {...act} onRead={() => setSelectedReport(act)} />
                 ))}
               </div>
             </BentoCard>
 
             {/* Strategic Gap Analysis */}
-            <BentoCard title="Gap Analysis & Strategy" icon={Sparkles} className="md:col-span-5">
-              <div className="flex flex-col gap-4">
+            <BentoCard title="Strategy Reports" icon={Sparkles} className="md:col-span-4">
+              <div className="flex flex-col gap-6">
                 {insights.filter(i => i.type === 'strategy').map((ins) => (
-                  <div key={ins.id} className="p-6 rounded-3xl bg-primary/5 border border-primary/10 space-y-4">
-                    <div className="flex items-center gap-2 text-primary font-black text-[10px] uppercase tracking-widest">
-                      <FileText className="h-4 w-4" /> Strategic Report
+                  <div key={ins.id} className="p-8 rounded-[2rem] bg-primary/5 border-2 border-primary/10 space-y-6 hover:border-primary/30 transition-all group/report">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-primary font-black text-[10px] uppercase tracking-widest">
+                        <FileText className="h-4 w-4" /> Strategic Gap
+                      </div>
+                      <div className="flex items-center gap-1 text-[10px] font-black text-emerald-500 uppercase">
+                        <ArrowUpRight className="h-3 w-3" /> High Impact
+                      </div>
                     </div>
-                    <h4 className="font-black text-lg leading-tight">{ins.title}</h4>
-                    <p className="text-sm text-muted-foreground leading-relaxed font-medium">{ins.description}</p>
-                    <div className="pt-2">
-                      <button className="w-full text-xs font-black bg-primary text-primary-foreground py-3 rounded-xl hover:opacity-90 uppercase tracking-widest">Execute Fulfillment Plan</button>
-                    </div>
+                    <h4 className="font-black text-2xl leading-tight text-foreground">{ins.title}</h4>
+                    <p className="text-md text-muted-foreground leading-relaxed font-medium line-clamp-3">{ins.description}</p>
+                    <button onClick={() => setSelectedReport(ins)} className="w-full text-xs font-black bg-primary text-primary-foreground py-5 rounded-2xl hover:opacity-90 uppercase tracking-widest shadow-lg shadow-primary/20 group-hover/report:scale-[1.02] transition-transform">Read Full Report</button>
                   </div>
                 ))}
               </div>
             </BentoCard>
 
             {/* SEO Battlefield */}
-            <BentoCard title="SEO Analysis: What You're Missing" icon={SearchCode} className="md:col-span-12">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <BentoCard title="SEO Battlefield: Top Gaps" icon={SearchCode} className="md:col-span-12">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {seoGaps.map((seo) => (
-                  <div key={seo.id} className="p-8 rounded-[2rem] bg-card border-2 hover:border-primary/30 transition-all space-y-6 relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-100 transition-all">
-                      <SearchCode className="h-8 w-8" />
+                  <div key={seo.id} onClick={() => setSelectedReport(seo)} className="p-10 rounded-[3rem] bg-card border-2 hover:border-primary/50 transition-all space-y-8 relative overflow-hidden group cursor-pointer">
+                    <div className="absolute -right-8 -top-8 p-12 bg-primary/5 rounded-full group-hover:bg-primary/10 transition-all">
+                      <TrendingUp className="h-10 w-10 text-primary" />
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-primary">{seo.competitor} Advantage</span>
+                      <span className="text-xs font-black uppercase tracking-[0.2em] text-primary">{seo.competitor} Advantage</span>
                     </div>
-                    <p className="text-md font-bold leading-relaxed">{seo.gap}</p>
-                    <div className="p-4 rounded-2xl bg-muted/50 border-l-4 border-primary italic text-sm">
-                      AI Suggestion: “{seo.suggestion}”
+                    <h4 className="text-2xl font-black leading-tight text-foreground">{seo.gap}</h4>
+                    <p className="text-sm text-muted-foreground leading-relaxed font-medium">{seo.suggestion}</p>
+                    <div className="pt-4 flex items-center gap-2 text-xs font-black text-primary uppercase tracking-widest">
+                      Deep Audit Details <ChevronRight className="h-4 w-4" />
                     </div>
                   </div>
                 ))}
@@ -396,17 +422,19 @@ export const Dashboard = () => {
             </BentoCard>
 
             {/* Opportunity Alerts */}
-            <BentoCard title="Opportunity Alerts" icon={Zap} className="md:col-span-12">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <BentoCard title="High-Value Opportunity Alerts" icon={Zap} className="md:col-span-12">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {insights.filter(i => i.type === 'opportunity').map((opp) => (
-                  <div key={opp.id} className="p-8 rounded-[2.5rem] border-2 border-emerald-500/20 bg-emerald-500/[0.02] space-y-4 relative overflow-hidden group">
-                    <div className="absolute -right-6 -bottom-6 h-24 w-24 bg-emerald-500/10 rounded-full blur-2xl group-hover:scale-150 transition-all duration-1000" />
-                    <div className="flex items-center gap-2 text-emerald-500 font-black text-[10px] uppercase tracking-widest">
-                      <Zap className="h-4 w-4" /> Market Strike Zone
+                  <div key={opp.id} onClick={() => setSelectedReport(opp)} className="p-10 rounded-[3rem] border-2 border-emerald-500/30 bg-emerald-500/[0.03] space-y-6 relative overflow-hidden group cursor-pointer hover:border-emerald-500 transition-all">
+                    <div className="absolute -right-10 -bottom-10 h-40 w-40 bg-emerald-500/10 rounded-full blur-[60px] group-hover:scale-150 transition-all duration-1000" />
+                    <div className="flex items-center gap-3 text-emerald-500 font-black text-xs uppercase tracking-widest">
+                      <AlertCircle className="h-5 w-5" /> Strike Opportunity
                     </div>
-                    <h4 className="font-black text-xl leading-tight">{opp.title}</h4>
-                    <p className="text-sm text-muted-foreground leading-relaxed font-medium">{opp.description}</p>
-                    <button className="text-xs font-black text-emerald-500 hover:underline uppercase tracking-widest">Strike Now →</button>
+                    <h4 className="font-black text-3xl leading-tight text-foreground">{opp.title}</h4>
+                    <p className="text-md text-muted-foreground leading-relaxed font-medium line-clamp-4">{opp.description}</p>
+                    <div className="pt-4 flex items-center gap-2 text-xs font-black text-emerald-500 uppercase tracking-widest">
+                      Read Action Plan <ChevronRight className="h-4 w-4" />
+                    </div>
                   </div>
                 ))}
               </div>
