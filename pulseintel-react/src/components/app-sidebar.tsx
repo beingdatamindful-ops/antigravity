@@ -3,11 +3,8 @@ import {
   BookOpen,
   Bot,
   Command,
-  Frame,
-  Map,
-  PieChart,
-  Settings2,
   LayoutDashboard as Terminal,
+  Plus,
 } from "lucide-react"
 
 import {
@@ -24,7 +21,6 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
 
-// This is sample data.
 const data = {
   user: {
     name: "YogJag",
@@ -50,11 +46,7 @@ const data = {
           url: "#",
         },
         {
-          title: "Competitor Feed",
-          url: "#",
-        },
-        {
-          title: "Market Trends",
+          title: "Compare Rivals",
           url: "#",
         },
       ],
@@ -78,61 +70,6 @@ const data = {
         },
       ],
     },
-    {
-      title: "Monitoring",
-      url: "#",
-      icon: BookOpen,
-      items: [
-        {
-          title: "Site Watcher",
-          url: "#",
-        },
-        {
-          title: "Pricing Tracker",
-          url: "#",
-        },
-        {
-          title: "SEO Comparison",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings2,
-      items: [
-        {
-          title: "Tracked Domains",
-          url: "#",
-        },
-        {
-          title: "Integrations",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  projects: [
-    {
-      name: "CloudMetrics",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      name: "DataFlow AI",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "ScaleOps",
-      url: "#",
-      icon: Map,
-    },
   ],
 }
 
@@ -148,8 +85,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <Command className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">PulseIntel</span>
-                  <span className="truncate text-xs">Pro Plan</span>
+                  <span className="truncate font-semibold">{data.teams[0].name}</span>
+                  <span className="truncate text-xs">{data.teams[0].plan}</span>
                 </div>
               </a>
             </SidebarMenuButton>
@@ -192,8 +129,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <Command className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">PulseIntel</span>
-                  <span className="truncate text-xs">Pro Plan</span>
+                  <span className="truncate font-semibold">{data.user.name}</span>
+                  <span className="truncate text-xs">{data.user.email}</span>
                 </div>
               </a>
             </SidebarMenuButton>
