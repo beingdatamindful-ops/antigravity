@@ -41,11 +41,11 @@ const data = {
       items: [
         {
           title: "Overview",
-          url: "#",
+          url: "#overview",
         },
         {
           title: "Compare Rivals",
-          url: "#",
+          url: "#overview",
         },
       ],
     },
@@ -56,15 +56,15 @@ const data = {
       items: [
         {
           title: "Strategy Reports",
-          url: "#",
+          url: "#strategy",
         },
         {
           title: "Opportunity Alerts",
-          url: "#",
+          url: "#opportunity",
         },
         {
           title: "Gap Analysis",
-          url: "#",
+          url: "#gap",
         },
       ],
     },
